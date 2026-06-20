@@ -39,4 +39,20 @@ export const getBatch = (batchId) =>
 // Absolute download URL for a completed job's output.
 export const downloadUrl = (jobId) => `${api.defaults.baseURL}/download/${jobId}`
 
+// Download a job's output and save it with the given filename.
+// We fetch as a blob and trigger a same-origin object-URL download so the
+// browser honors `filename` — the HTML `download` attribute is ignored for
+// cross-origin URLs (frontend :5173 vs backend :8000).
+export const downloadAs = async (jobId, filename) => {
+  const res = await api.get(`/download/${jobId}`, { responseType: 'blob' })
+  const url = URL.createObjectURL(res.data)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
 export default api

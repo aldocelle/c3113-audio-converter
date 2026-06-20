@@ -1,5 +1,5 @@
 import React from 'react'
-import { downloadUrl } from '../services/api'
+import { downloadAs } from '../services/api'
 
 const STATUS_META = {
   pending:    { label: 'Queued',     color: 'var(--text-muted)', icon: '○' },
@@ -68,18 +68,18 @@ export default function ResultsList({ batch, idToName, format }) {
               </div>
 
               {job.status === 'completed' ? (
-                <a
-                  href={downloadUrl(job.job_id)}
-                  download={outName}
+                <button
+                  onClick={() => downloadAs(job.job_id, outName)}
                   style={{
                     flexShrink: 0,
                     background: 'var(--accent)', color: '#fff',
-                    textDecoration: 'none', fontSize: 13, fontWeight: 600,
+                    border: 'none', cursor: 'pointer',
+                    fontSize: 13, fontWeight: 600,
                     padding: '6px 14px', borderRadius: 'var(--radius)',
                   }}
                 >
                   Download
-                </a>
+                </button>
               ) : (
                 <span style={{ flexShrink: 0, fontSize: 12, color: 'var(--text-muted)' }}>
                   {job.status === 'failed' ? '—' : '…'}
