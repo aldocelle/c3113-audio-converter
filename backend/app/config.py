@@ -3,6 +3,7 @@ import json
 import sys
 import os
 from datetime import datetime
+from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings
 
 
@@ -11,7 +12,12 @@ class Settings(BaseSettings):
     app_env: str = "development"
     app_debug: bool = True
     app_host: str = "0.0.0.0"
-    app_port: int = 8000
+    # Railway (and most PaaS) inject the listening port via $PORT.
+    # Accept either PORT or APP_PORT; fall back to 8000 for local dev.
+    app_port: int = Field(
+        default=8000,
+        validation_alias=AliasChoices("PORT", "APP_PORT", "app_port"),
+    )
 
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = "redis://localhost:6379/0"
@@ -30,6 +36,8 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env" if os.path.exists(".env") else None
         case_sensitive = False
+        # Ignore unrelated env vars (Railway injects many) instead of crashing.
+        extra = "ignore"
 
 
 settings = Settings()
