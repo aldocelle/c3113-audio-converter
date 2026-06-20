@@ -1,0 +1,28 @@
+# Python virtualenv — host-arch, must never enter the image
+venv/
+.venv/
+env/
+
+# Bytecode / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local runtime data — not part of the image
+uploads/
+temp/
+*.rdb
+
+# Secrets / local env (Railway injects env vars at runtime)
+.env
+.env.*
+!.env.example
+
+# Dev tooling
+tests/
+.git/
+.gitignore
+*.md
