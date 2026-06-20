@@ -3,6 +3,18 @@ import React from 'react'
 const FORMATS = ['mp3', 'wav', 'flac', 'ogg', 'm4a']
 const BITRATES = ['64k', '128k', '192k', '256k', '320k']
 const SAMPLE_RATES = ['22050', '44100', '48000', '96000']
+
+// Sample rates each format supports (mirrors backend SUPPORTED_SAMPLE_RATES).
+// MP3 (libmp3lame) cannot encode 96 kHz; all others can.
+const RATES_BY_FORMAT = {
+  mp3: ['22050', '44100', '48000'],
+  m4a: ['22050', '44100', '48000', '96000'],
+  wav: ['22050', '44100', '48000', '96000'],
+  flac: ['22050', '44100', '48000', '96000'],
+  ogg: ['22050', '44100', '48000', '96000'],
+}
+export const rateAllowed = (format, rate) =>
+  (RATES_BY_FORMAT[format] || SAMPLE_RATES).includes(rate)
 const CHANNELS = [
   { label: 'Mono', value: '1' },
   { label: 'Stereo', value: '2' },
@@ -81,7 +93,14 @@ function Card({ children }) {
 }
 
 export default function ConversionSettings({ settings, onChange }) {
-  const set = (key) => (e) => onChange({ ...settings, [key]: e.target.value })
+  const set = (key) => (e) => {
+    const next = { ...settings, [key]: e.target.value }
+    // If the new format can't do the current sample rate, snap to 48000.
+    if (key === 'format' && !rateAllowed(next.format, next.sampleRate)) {
+      next.sampleRate = '48000'
+    }
+    onChange(next)
+  }
 
   const [brColor, brText] = BITRATE_HINT[settings.bitrate] || ['var(--text-muted)', '']
   const [srColor, srText] = RATE_HINT[settings.sampleRate] || ['var(--text-muted)', '']
@@ -113,7 +132,14 @@ export default function ConversionSettings({ settings, onChange }) {
       <Card>
         <label style={labelStyle}><Icon d={ICONS.rate} /> Sample Rate</label>
         <select style={selectStyle} value={settings.sampleRate} onChange={set('sampleRate')}>
-          {SAMPLE_RATES.map((r) => <option key={r} value={r}>{r} Hz</option>)}
+          {SAMPLE_RATES.map((r) => {
+            const disabled = !rateAllowed(settings.format, r)
+            return (
+              <option key={r} value={r} disabled={disabled}>
+                {r} Hz{disabled ? ` — n/a for ${settings.format.toUpperCase()}` : ''}
+              </option>
+            )
+          })}
         </select>
         <Hint color={srColor} text={srText} />
       </Card>

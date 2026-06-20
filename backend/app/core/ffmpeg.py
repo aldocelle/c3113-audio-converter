@@ -21,6 +21,37 @@ CONTAINER_MAP = {
     "m4a": "ipod",
 }
 
+# Sample rates each encoder accepts, verified empirically against ffmpeg
+# 7.1 in this image. Only libmp3lame (MP3) rejects 96 kHz; everything else
+# (AAC/PCM/FLAC/Vorbis) handles the full range.
+SUPPORTED_SAMPLE_RATES = {
+    "mp3":  {8000, 16000, 22050, 32000, 44100, 48000},
+    "m4a":  {8000, 16000, 22050, 32000, 44100, 48000, 96000},
+    "wav":  {8000, 16000, 22050, 32000, 44100, 48000, 96000},
+    "flac": {8000, 16000, 22050, 32000, 44100, 48000, 96000},
+    "ogg":  {8000, 16000, 22050, 32000, 44100, 48000, 96000},
+}
+
+
+def _extract_ffmpeg_error(stderr: str) -> str:
+    """Pull the meaningful error out of FFmpeg stderr.
+
+    FFmpeg prints a version banner + build config first, then the real error
+    at the end. Taking stderr[:500] grabs only the banner, so surface the last
+    informative lines instead.
+    """
+    if not stderr:
+        return "FFmpeg failed with no error output"
+    skip = ("ffmpeg version", "built with", "configuration:", "lib")
+    lines = [
+        ln.strip() for ln in stderr.splitlines()
+        if ln.strip() and not ln.strip().lower().startswith(skip)
+    ]
+    if not lines:
+        lines = [ln.strip() for ln in stderr.splitlines() if ln.strip()]
+    # Keep the tail (the actual diagnostic), capped for safety.
+    return " | ".join(lines[-4:])[:500]
+
 
 def build_ffmpeg_cmd(
     input_path: str,
@@ -44,8 +75,13 @@ def build_ffmpeg_cmd(
 
     if not (16 <= br_num <= 320):
         raise ValueError(f"Bitrate out of range: {br_num}k (16–320k)")
-    if sr_num not in {8000, 16000, 22050, 44100, 48000, 96000}:
-        raise ValueError(f"Sample rate not supported: {sr_num}")
+    allowed_rates = SUPPORTED_SAMPLE_RATES.get(format, set())
+    if sr_num not in allowed_rates:
+        nice = ", ".join(f"{r // 1000 if r % 1000 == 0 else r/1000:g}k" for r in sorted(allowed_rates))
+        raise ValueError(
+            f"{format.upper()} does not support {sr_num} Hz. "
+            f"Supported sample rates for {format.upper()}: {nice}."
+        )
     if ch_num not in {1, 2}:
         raise ValueError(f"Channels must be 1 or 2, got {ch_num}")
 
@@ -55,12 +91,14 @@ def build_ffmpeg_cmd(
     cmd = [
         settings.ffmpeg_path,
         "-i", input_path,
+        "-vn",          # drop any video/cover-art stream (else container muxing fails)
+        "-map", "0:a",  # take only the audio stream
         "-c:a", codec,
         "-b:a", bitrate,
         "-ar", sample_rate,
         "-ac", channels,
         "-y",  # overwrite output
-        f"-f", container,
+        "-f", container,
         output_path,
     ]
 
@@ -106,7 +144,7 @@ def convert_audio(
         )
 
         if result.returncode != 0:
-            stderr = result.stderr[:500]
+            stderr = _extract_ffmpeg_error(result.stderr)
             logger.error(
                 f"FFmpeg process failed",
                 extra={
