@@ -5,7 +5,7 @@
 set -e
 
 # Start the Celery worker in the background.
-celery -A worker.app worker --loglevel=info --concurrency=8 &
+celery -A worker.app worker --loglevel=info --concurrency=16 &
 
 # Start the web server in the foreground so the platform tracks the web process
 # and routes $PORT to it. If it exits, the container restarts.
