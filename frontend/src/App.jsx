@@ -17,6 +17,7 @@ export default function App() {
   const [files, setFiles] = useState([])
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [backendStatus, setBackendStatus] = useState('checking')
+  const [backendVersion, setBackendVersion] = useState('')
 
   const [phase, setPhase] = useState('idle')
   const [uploadPct, setUploadPct] = useState(0)
@@ -27,7 +28,10 @@ export default function App() {
 
   useEffect(() => {
     checkHealth()
-      .then(() => setBackendStatus('ok'))
+      .then((res) => {
+        setBackendStatus('ok')
+        setBackendVersion(res.data?.version || '')
+      })
       .catch(() => setBackendStatus('error'))
   }, [])
 
@@ -159,7 +163,10 @@ export default function App() {
               background: statusDot.color, display: 'inline-block',
               boxShadow: `0 0 8px ${statusDot.color}`,
             }} />
-            <span style={{ color: 'var(--text-muted)' }}>{statusDot.label}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <span style={{ color: 'var(--text-muted)' }}>{statusDot.label}</span>
+              {backendVersion && <span style={{ color: 'var(--text-muted)', fontSize: 10, opacity: 0.7 }}>v{backendVersion}</span>}
+            </div>
           </div>
         </div>
 
