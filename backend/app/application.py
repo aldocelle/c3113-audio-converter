@@ -1,3 +1,4 @@
+import os
 import time
 import uuid
 from fastapi import FastAPI, Request
@@ -44,8 +45,14 @@ def create_app() -> FastAPI:
         version="0.1.0",
     )
 
+    # Allowed origins: localhost for dev + any extra from CORS_ORIGINS env
+    # (comma-separated). The regex additionally permits all *.vercel.app
+    # deployments so preview/production URLs work without redeploying.
+    default_origins = ["http://localhost:5173", "http://localhost:3000"]
+    extra = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
     app.add_middleware(CORSMiddleware,
-        allow_origins=["http://localhost:5173", "http://localhost:3000"],
+        allow_origins=default_origins + extra,
+        allow_origin_regex=r"https://.*\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
