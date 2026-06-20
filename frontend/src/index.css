@@ -5,34 +5,61 @@
 }
 
 :root {
-  --bg: #0f0f10;
-  --surface: #1a1a1c;
-  --border: #2a2a2e;
-  --accent: #6c47ff;
-  --accent-hover: #7d5bff;
-  --text: #e8e8ea;
-  --text-muted: #6b6b75;
-  --success: #22c55e;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --radius: 8px;
+  --bg: #0a0a14;
+  --bg-2: #0d0d1a;
+  --surface: #14141f;
+  --surface-2: #1a1a28;
+  --border: #23233a;
+  --border-glow: #3a2f6e;
+  --accent: #7c5cff;
+  --accent-2: #a78bfa;
+  --accent-hover: #8d6dff;
+  --gradient: linear-gradient(135deg, #7c5cff 0%, #6366f1 100%);
+  --text: #ececf2;
+  --text-muted: #7a7a90;
+  --text-dim: #565670;
+  --success: #34d399;
+  --error: #f87171;
+  --warning: #fbbf24;
+  --radius: 12px;
+  --radius-sm: 8px;
   --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(124, 92, 255, 0.10), transparent 60%),
+    radial-gradient(800px 500px at 100% 100%, rgba(99, 102, 241, 0.06), transparent 55%),
+    var(--bg);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.5;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-button {
-  font-family: var(--font);
-  cursor: pointer;
+button { font-family: var(--font); cursor: pointer; }
+select, input { font-family: var(--font); }
+
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #7c5cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-select, input {
-  font-family: var(--font);
+/* subtle pulse for the dropzone icon glow */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 24px rgba(124, 92, 255, 0.35), inset 0 0 16px rgba(124, 92, 255, 0.15); }
+  50%      { box-shadow: 0 0 40px rgba(124, 92, 255, 0.55), inset 0 0 22px rgba(124, 92, 255, 0.25); }
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path d='M2 4l4 4 4-4' stroke='%237a7a90' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
 }
