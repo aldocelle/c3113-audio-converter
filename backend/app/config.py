@@ -1,6 +1,7 @@
 import logging
 import json
 import sys
+import os
 from datetime import datetime
 from pydantic_settings import BaseSettings
 
@@ -24,10 +25,10 @@ class Settings(BaseSettings):
     ffmpeg_timeout_seconds: int = 300
 
     log_level: str = "INFO"
-    log_format: str = "json"  # "json" or "text"
+    log_format: str = "json"
 
     class Config:
-        env_file = ".env"
+        env_file = ".env" if os.path.exists(".env") else None
         case_sensitive = False
 
 
