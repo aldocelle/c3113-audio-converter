@@ -1,0 +1,16 @@
+node_modules/
+.git/
+.vscode/
+.DS_Store
+*.pyc
+__pycache__/
+.pytest_cache/
+.env.local
+.env.*.local
+dist/
+build/
+coverage/
+.claude/
+ffmpeg-8.1.2/
+dump.rdb
+*.log
