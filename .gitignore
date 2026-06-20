@@ -1,1 +1,19 @@
 .qpanda/
+
+# macOS
+.DS_Store
+
+# Vercel local project linking
+.vercel/
+frontend/.vercel/
+
+# Throwaway test media (don't bloat the repo)
+test.m4a
+test_converted.mp3
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
