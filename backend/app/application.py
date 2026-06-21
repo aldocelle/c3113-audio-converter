@@ -42,7 +42,7 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=settings.app_name,
         debug=settings.app_debug,
-        version="0.2.0",
+        version="0.3.0",
     )
 
     # Allowed origins: localhost for dev + any extra from CORS_ORIGINS env
