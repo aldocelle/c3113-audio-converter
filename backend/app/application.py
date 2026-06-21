@@ -91,7 +91,7 @@ def create_app() -> FastAPI:
             "status": "ok",
             "app": settings.app_name,
             "environment": settings.app_env,
-            "version": "0.1.0",
+            "version": "0.2.0",
         }
 
     @app.get("/ready")
